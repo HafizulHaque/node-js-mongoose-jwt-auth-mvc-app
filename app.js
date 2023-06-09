@@ -1,10 +1,11 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const { PORT, DB_USER, DB_PASSWORD, DB_NAME } = require('./env')
+const express = require('express')
+const mongoose = require('mongoose')
+const dotenv = require('dotenv')
 const authRoutes = require('./routes/authRoutes')
-const app = express();
+const app = express()
 
 // middleware
+dotenv.config();
 app.use(express.static('public'));
 app.use(express.json());
 
@@ -12,10 +13,10 @@ app.use(express.json());
 app.set('view engine', 'ejs');
 
 // database connection
-const dbURI = `mongodb+srv://${DB_USER}:${DB_PASSWORD}@cluster0.lfv1ilu.mongodb.net/${DB_NAME}`;
-mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then((connect) => console.log('database connected'))
-  .then(() => app.listen(PORT, () => console.log(`server running at http://localhost:${PORT}`)))
+mongoose.connect(process.env.DB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('database connected'))
+  .then(() => app.listen(process.env.PORT, 
+    () => console.log(`server running at http://localhost:${process.env.PORT}`)))
   .catch((err) => console.log(err))
 
 // routes
