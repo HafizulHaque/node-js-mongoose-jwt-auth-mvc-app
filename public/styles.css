@@ -137,3 +137,12 @@ footer{
   margin-top: 120px;
   color: #aaa;
 }
+
+.small {
+  margin-top: .5rem;
+  font-size: .8rem;
+}
+
+.small a {
+  color: rgba(255, 0, 0, .8);
+}
