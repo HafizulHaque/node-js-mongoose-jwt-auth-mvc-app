@@ -1,4 +1,29 @@
+const jwt = require('jsonwebtoken')
 const User = require('../models/User')
+const JWT_MAX_AGE = 60 * 60;
+
+const handleErrors = (err) => {
+  let errors = {email: '', password: ''}
+
+  //duplicate key error
+  if(err.code === 11000){
+    errors['email'] = 'This email is already registered'
+    return errors;
+  }
+  //validation errors
+  if(err.message.includes('user validation failed')){
+    Object.values(err.errors).forEach(({ properties }) => {
+      errors[properties.path] = properties.message;
+    });
+  }
+  return errors;
+}
+
+const createToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: JWT_MAX_AGE
+  })
+}
 
 const signup_get = (req, res) => {
   res.render('signup')
@@ -13,9 +38,22 @@ const signup_post = async (req, res) => {
 
   try{
     const user = await User.create({ email, password })
-    res.status(201).json(user);
+    const token = createToken(user._id);
+    //setting cookie token
+    res.cookie('jwt', token, {
+      maxAge: JWT_MAX_AGE * 1000,
+      httpOnly: true
+    })
+    //returning json 
+    res.status(201).json({
+      user: {
+        id: user._id,
+        email: user.email
+      }
+    });
   }catch(err){
-    console.log(err);
+    let errors = handleErrors(err);
+    res.status(400).json({ errors })
   }
 }
 
